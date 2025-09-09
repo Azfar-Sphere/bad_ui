@@ -3,12 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>The Most Annoying Form Ever</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        
+        .input-container {
+            margin-bottom: 20px;
+        }
+        
+        #emailInput {
+            padding: 15px;
+            font-size: 18px;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .virtual-keyboard {
+            position: fixed;
+            bottom: -400px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            transition: bottom 0.3s ease;
+            width: 90vw;
+            max-width: 600px;
+            z-index: 10;
+        }
+        
+        .virtual-keyboard.show {
+            bottom: 0;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+            flex-wrap: wrap;
+        }
+        
+        .key {
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 10px;
+            margin: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 40px;
+            text-align: center;
+            font-size: 16px;
+            user-select: none;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .key:hover {
+            background: #555;
+        }
+        
+        .key.space {
+            min-width: 200px;
+        }
+        
+        .key.visible {
+            opacity: 1;
+        }
+        
+        .lamp {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffeb3b 0%, #ffc107 70%, #ff8f00 100%);
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 100;
+            top: 20px;
+            left: 20px;
+            border: 3px solid #ff8f00;
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .lamp:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+        
+        .lamp::after {
+            content: '💡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
+        
+        .illumination {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+            display: none;
+        }
+        
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #45a049;
+        }
+        
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            font-size: 20px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            max-width: 80vw;
+        }
+        
+        .close-message {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
 </head>
-
 <body>
-<h1>Bad UI</h1>
-
+    <div class="container">
+        <h1>Enter Your Email</h1>
+        <div class="input-container">
+            <input type="text" id="emailInput" placeholder="Click here to enter email" readonly>
+        </div>
+        <button class="submit-btn" onclick="submitForm()">Submit</button>
+    </div>
+    
+    <div class="lamp" id="lamp"></div>
+    <div class="illumination" id="illumination"></div>
+    
+    <div class="virtual-keyboard" id="virtualKeyboard">
+        <div class="keyboard-row" id="row1">
+            <div class="key" data-key="q">Q</div>
+            <div class="key" data-key="w">W</div>
+            <div class="key" data-key="e">E</div>
+            <div class="key" data-key="r">R</div>
+            <div class="key" data-key="t">T</div>
+            <div class="key" data-key="y">Y</div>
+            <div class="key" data-key="u">U</div>
+            <div class="key" data-key="i">I</div>
+            <div class="key" data-key="o">O</div>
+            <div class="key" data-key="p">P</div>
+        </div>
+        <div class="keyboard-row" id="row2">
+            <div class="key" data-key="a">A</div>
+            <div class="key" data-key="s">S</div>
+            <div class="key" data-key="d">D</div>
+            <div class="key" data-key="f">F</div>
+            <div class="key" data-key="g">G</div>
+            <div class="key" data-key="h">H</div>
+            <div class="key" data-key="j">J</div>
+            <div class="key" data-key="k">K</div>
+            <div class="key" data-key="l">L</div>
+        </div>
+        <div class="keyboard-row" id="row3">
+            <div class="key" data-key="z">Z</div>
+            <div class="key" data-key="x">X</div>
+            <div class="key" data-key="c">C</div>
+            <div class="key" data-key="v">V</div>
+            <div class="key" data-key="b">B</div>
+            <div class="key" data-key="n">N</div>
+            <div class="key" data-key="m">M</div>
+        </div>
+        <div class="keyboard-row" id="row4">
+            <div class="key" data-key="1">1</div>
+            <div class="key" data-key="2">2</div>
+            <div class="key" data-key="3">3</div>
+            <div class="key" data-key="4">4</div>
+            <div class="key" data-key="5">5</div>
+            <div class="key" data-key="6">6</div>
+            <div class="key" data-key="7">7</div>
+            <div class="key" data-key="8">8</div>
+            <div class="key" data-key="9">9</div>
+            <div class="key" data-key="0">0</div>
+        </div>
+        <div class="keyboard-row" id="row5">
+            <div class="key" data-key="@">@</div>
+            <div class="key" data-key=".">.</div>
+            <div class="key" data-key="-">-</div>
+            <div class="key" data-key="_">_</div>
+            <div class="key space" data-key=" ">SPACE</div>
+            <div class="key" data-key="backspace">⌫</div>
+        </div>
+    </div>
+    
+    <div class="message" id="message">
+        <div id="messageText"></div>
+        <button class="close-message" onclick="closeMessage()">Close</button>
+    </div>
+    
+    <script>
+        let isDragging = false;
+        let lampReturned = true;
+        let keyboardShuffled = false;
+        let originalKeyLayout = [];
+        
+        const lamp = document.getElementById('lamp');
+        const illumination = document.getElementById('illumination');
+        const virtualKeyboard = document.getElementById('virtualKeyboard');
+        const emailInput = document.getElementById('emailInput');
+        const message = document.getElementById('message');
+        const messageText = document.getElementById('messageText');
+        
+        // Store original key layout
+        document.addEventListener('DOMContentLoaded', function() {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                originalKeyLayout.push({
+                    element: key,
+                    parent: key.parentNode,
+                    text: key.textContent,
+                    dataKey: key.getAttribute('data-key')
+                });
+            });
+        });
+        
+        // Disable physical keyboard input
+        document.addEventListener('keydown', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Show virtual keyboard when input is clicked
+        emailInput.addEventListener('click', function() {
+            virtualKeyboard.classList.add('show');
+        });
+        
+        // Lamp dragging functionality
+        lamp.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+        
+        // Touch events for mobile
+        lamp.addEventListener('touchstart', startDragging);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDragging);
+        
+        function startDragging(e) {
+            isDragging = true;
+            lamp.style.transition = 'none';
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            lamp.style.left = (clientX - 30) + 'px';
+            lamp.style.top = (clientY - 30) + 'px';
+            
+            // Check if lamp is near keyboard
+            const keyboardRect = virtualKeyboard.getBoundingClientRect();
+            const lampRect = lamp.getBoundingClientRect();
+            
+            if (lampRect.bottom >= keyboardRect.top && 
+                lampRect.left + 30 >= keyboardRect.left && 
+                lampRect.left + 30 <= keyboardRect.right &&
+                virtualKeyboard.classList.contains('show')) {
+                
+                showIllumination(clientX, clientY);
+                illuminateKeys(clientX, clientY);
+            } else {
+                hideIllumination();
+            }
+        }
+        
+        function stopDragging() {
+            isDragging = false;
+            lamp.style.transition = 'all 0.3s ease';
+        }
+        
+        function showIllumination(x, y) {
+            illumination.style.display = 'block';
+            illumination.style.left = (x - 75) + 'px';
+            illumination.style.top = (y - 75) + 'px';
+        }
+        
+        function hideIllumination() {
+            illumination.style.display = 'none';
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => key.classList.remove('visible'));
+        }
+        
+        function illuminateKeys(lampX, lampY) {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                const keyRect = key.getBoundingClientRect();
+                const keyCenter = {
+                    x: keyRect.left + keyRect.width / 2,
+                    y: keyRect.top + keyRect.height / 2
+                };
+                
+                const distance = Math.sqrt(
+                    Math.pow(lampX - keyCenter.x, 2) + 
+                    Math.pow(lampY - keyCenter.y, 2)
+                );
+                
+                if (distance < 75) {
+                    key.classList.add('visible');
+                } else {
+                    key.classList.remove('visible');
+                }
+            });
+        }
+        
+        // Key click functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('key') && e.target.classList.contains('visible')) {
+                const key = e.target.getAttribute('data-key');
+                
+                if (key === 'backspace') {
+                    emailInput.value = emailInput.value.slice(0, -1);
+                } else {
+                    emailInput.value += key;
+                }
+                
+                // Return lamp to original position
+                returnLampToOrigin();
+                
+                // Shuffle keyboard after a delay
+                setTimeout(() => {
+                    shuffleKeyboard();
+                }, 300);
+            }
+        });
+        
+        function returnLampToOrigin() {
+            lamp.style.left = '20px';
+            lamp.style.top = '20px';
+            hideIllumination();
+            lampReturned = true;
+        }
+        
+        function shuffleKeyboard() {
+            const rows = document.querySelectorAll('.keyboard-row');
+            const allKeys = [];
+            
+            // Collect all keys except space and backspace
+            rows.forEach(row => {
+                const keys = row.querySelectorAll('.key');
+                keys.forEach(key => {
+                    if (!key.classList.contains('space') && 
+                        key.getAttribute('data-key') !== 'backspace') {
+                        allKeys.push({
+                            element: key,
+                            text: key.textContent,
+                            dataKey: key.getAttribute('data-key')
+                        });
+                    }
+                });
+            });
+            
+            // Shuffle the keys
+            for (let i = allKeys.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allKeys[i], allKeys[j]] = [allKeys[j], allKeys[i]];
+            }
+            
+            // Reassign shuffled keys
+            let keyIndex = 0;
+            rows.forEach(row => {
+                const keys = row.querySelectorAll('.key');
+                keys.forEach(key => {
+                    if (!key.classList.contains('space') && 
+                        key.getAttribute('data-key') !== 'backspace' &&
+                        keyIndex < allKeys.length) {
+                        key.textContent = allKeys[keyIndex].text;
+                        key.setAttribute('data-key', allKeys[keyIndex].dataKey);
+                        keyIndex++;
+                    }
+                });
+            });
+            
+            keyboardShuffled = true;
+        }
+        
+        function submitForm() {
+            const email = emailInput.value.trim();
+            if (email) {
+                messageText.textContent = `Congratulations for entering "${email}", this was a complete waste of time!`;
+                message.style.display = 'block';
+                virtualKeyboard.classList.remove('show');
+            } else {
+                alert('Please enter an email first!');
+            }
+        }
+        
+        function closeMessage() {
+            message.style.display = 'none';
+            emailInput.value = '';
+            returnLampToOrigin();
+        }
+    </script>
 </body>
-<footer>Footer</footer>
 </html>
